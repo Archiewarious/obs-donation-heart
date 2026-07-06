@@ -1,0 +1,95 @@
+/* =========================================================================
+   СЕРДЦЕ-ДОНАТ для DonationAlerts — вставить в поле "Пользовательский CSS"
+   (Custom CSS) браузер-источника в OBS.
+
+   Как поставить:
+   1. В OBS источник = твой виджет-цель:
+      https://www.donationalerts.com/widget/goal/ВАШ_НОМЕР?token=ВАШ_ТОКЕН
+   2. Свойства источника -> поле "Пользовательский CSS" -> вставить ВЕСЬ этот файл.
+   3. Ширину/высоту источника поставь ~360x420. Размер сердца меняется
+      переменной --size ниже.
+
+   Что делает: превращает штатную полосу цели в неоновое сердце, которое
+   наполняется "водой" снизу вверх по мере сбора. Уровень тянет сам DA
+   (ничего запускать не нужно).
+
+   Настройка: цвет воды, свечение и размер помечены комментариями ниже.
+   ВАЖНО про картинку: тут заливка — розовый градиент, а НЕ твой PNG.
+   Почему так — см. сообщение в чате (в чистом CSS твою картинку нельзя
+   поднимать вертикально без искажения). Хочешь именно свою картинку —
+   это отдельный вариант, скажи.
+   ========================================================================= */
+
+:root{
+  --size: 340px;              /* размер сердца */
+  --water-dark:  #ff147d;     /* цвет воды у дна */
+  --water-mid:   #ff49a0;
+  --water-light: #ff9dd0;     /* цвет воды у поверхности */
+  --neon:        #ff2d84;     /* цвет неонового контура/свечения */
+}
+
+/* прозрачный фон (OBS), центрирование */
+html,body,#widget-app,.widget-layout{ background:transparent !important; }
+
+/* контейнер -> квадрат под сердце */
+#widget-app .widget-goal.horizontal{
+  width:var(--size) !important; height:var(--size) !important;
+  margin:14px auto !important; position:relative !important;
+  display:block !important; overflow:visible !important;
+}
+#widget-app .goal-header, #widget-app .goal-footer{ display:none !important; }
+#widget-app .goal-body{
+  width:var(--size) !important; height:var(--size) !important;
+  position:relative !important; margin:0 auto !important; padding:0 !important;
+  overflow:visible !important;
+}
+
+/* дорожка = форма сердца (маска) + тёмная "пустая" подложка */
+#widget-app .goal-progress-bar{
+  position:absolute !important; left:0 !important; top:0 !important;
+  width:var(--size) !important; height:var(--size) !important;
+  background:linear-gradient(180deg, rgba(255,90,160,.10), rgba(90,8,40,.30)) !important;
+  border:0 !important; min-height:0 !important; border-radius:0 !important;
+  overflow:hidden !important;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2029.6'%3E%3Cpath%20d='M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2c6.1-9.3,16-12.1,16-21.2C32,3.8,28.2,0,23.6,0z'%20fill='%23000'/%3E%3C/svg%3E") center/contain no-repeat !important;
+          mask:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2029.6'%3E%3Cpath%20d='M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2c6.1-9.3,16-12.1,16-21.2C32,3.8,28.2,0,23.6,0z'%20fill='%23000'/%3E%3C/svg%3E") center/contain no-repeat !important;
+}
+
+/* вода: заливку DA (её ширину = процент сбора) поворачиваем в вертикаль.
+   right у DA остаётся нетронутым — это и есть живой уровень. */
+#widget-app .progress-bar-filler.horizontal{
+  left:0 !important; top:0 !important; bottom:auto !important;
+  width:auto !important; height:var(--size) !important;
+  background-image:
+    linear-gradient(115deg, transparent 42%, rgba(255,255,255,.40) 50%, transparent 58%),
+    linear-gradient(to right, var(--water-dark), var(--water-mid) 55%, var(--water-light)) !important;
+  background-size:260px 100%, 100% 100% !important;
+  background-repeat:no-repeat !important;
+  box-shadow:0 0 26px rgba(255,45,140,.65) !important;
+  transform-origin:0 0 !important;
+  transform:translateY(var(--size)) rotate(-90deg) !important;
+  animation:obsheart-shimmer 3s linear infinite, obsheart-bob 4.5s ease-in-out infinite !important;
+}
+
+/* неоновый контур сердца поверх (всегда светится) */
+#widget-app .goal-body::after{
+  content:'' !important; position:absolute !important; inset:0 !important;
+  pointer-events:none !important; z-index:4 !important;
+  background:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2029.6'%3E%3Cpath%20d='M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2c6.1-9.3,16-12.1,16-21.2C32,3.8,28.2,0,23.6,0z'%20fill='none'%20stroke='%23ff5fa8'%20stroke-width='1.2'/%3E%3C/svg%3E") center/contain no-repeat !important;
+  animation:obsheart-glow 2.6s ease-in-out infinite !important;
+}
+
+/* текст суммы под сердцем */
+#widget-app .goal-progress-text.goal-text{
+  position:absolute !important; left:0 !important; right:auto !important;
+  top:calc(var(--size) + 10px) !important; width:var(--size) !important;
+  text-align:center !important; z-index:5 !important;
+  font-family:Montserrat, Arial, sans-serif !important;
+}
+
+@keyframes obsheart-shimmer{ 0%{background-position:-260px 0, 0 0} 100%{background-position:260px 0, 0 0} }
+@keyframes obsheart-bob{ 0%,100%{border-radius:0 22px 22px 0} 50%{border-radius:0 40px 40px 0} }
+@keyframes obsheart-glow{
+  0%,100%{ filter:drop-shadow(0 0 4px var(--neon)) drop-shadow(0 0 12px rgba(255,60,150,.8)) }
+  50%{     filter:drop-shadow(0 0 8px var(--neon)) drop-shadow(0 0 22px rgba(255,60,150,1)) }
+}

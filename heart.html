@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Сердце-донат · прототип</title>
+<style>
+  html,body{margin:0;height:100%;background:transparent;overflow:hidden;
+    font-family:Montserrat,Arial,sans-serif;color:#fff}
+  body.debug{background:#15151b}                 /* тёмная подложка только для отладки */
+  #stage{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  canvas{display:block;transform-origin:center;animation:heartbeat 2.4s ease-in-out infinite;will-change:transform,filter}
+  body.nopulse canvas{animation:none}
+  /* очень лёгкий пульс «тук-тук» + синхронный всплеск свечения по контуру */
+  @keyframes heartbeat{
+    0%  {transform:scale(1);      filter:drop-shadow(0 0 3px rgba(255,60,150,.25))}
+    11% {transform:scale(1.016);  filter:drop-shadow(0 0 15px rgba(255,70,155,.85))}
+    22% {transform:scale(1);      filter:drop-shadow(0 0 5px rgba(255,60,150,.3))}
+    33% {transform:scale(1.009);  filter:drop-shadow(0 0 10px rgba(255,65,150,.55))}
+    46% {transform:scale(1);      filter:drop-shadow(0 0 3px rgba(255,60,150,.25))}
+    100%{transform:scale(1);      filter:drop-shadow(0 0 3px rgba(255,60,150,.25))}
+  }
+  #amount{margin-top:6px;font-weight:800;font-size:30px;letter-spacing:.5px;
+    text-shadow:0 2px 10px rgba(0,0,0,.6),0 0 18px rgba(255,40,120,.55);white-space:nowrap}
+  #title{display:none;margin:8px 0 0;font-weight:800;font-size:22px;text-align:center;max-width:90vw;
+    text-shadow:0 2px 10px rgba(0,0,0,.6),0 0 16px rgba(255,40,120,.5)}
+  #title.on{display:block}
+  #panel{position:fixed;left:14px;bottom:14px;background:rgba(0,0,0,.55);
+    padding:12px 14px;border-radius:12px;backdrop-filter:blur(6px);font-size:13px;width:250px}
+  #panel.hidden{display:none}
+  #panel label{display:block;margin:6px 0 2px;opacity:.85}
+  #panel input[type=range]{width:100%}
+  #panel .row{display:flex;gap:8px;align-items:center;justify-content:space-between}
+  #pct{font-weight:800;font-size:16px}
+  button{background:#ff2d78;border:0;color:#fff;padding:6px 10px;border-radius:8px;cursor:pointer;font-weight:700}
+  button.off{background:#444}
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="c"></canvas>
+  <div id="title"></div>
+  <div id="amount"></div>
+</div>
+
+<div id="panel">
+  <div class="row"><b>Прототип «вода в сердце»</b><span id="pct">0%</span></div>
+  <label>Уровень заполнения</label>
+  <input id="lvl" type="range" min="0" max="100" value="35">
+  <div class="row" style="margin-top:10px">
+    <button id="auto">Авто-демо: вкл</button>
+    <button id="dbg" class="off">Фон</button>
+  </div>
+  <div style="margin-top:8px;opacity:.7;line-height:1.4">В OBS панель прячется: <code>?obs=1</code></div>
+</div>
+
+<script>
+const P = new URLSearchParams(location.search);
+const OBS = P.has('obs');
+const SIZE = +(P.get('size') || 440);
+if (P.has('debug')) document.body.classList.add('debug');
+if (P.get('pulse')==='0') document.body.classList.add('nopulse');   // ?pulse=0 — выключить биение
+if (OBS) document.getElementById('panel').classList.add('hidden');
+
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+const amountEl = document.getElementById('amount');
+const titleEl = document.getElementById('title');
+const titleOn = P.get('title') !== '0';         // надпись показываем по умолчанию; спрятать — ?title=0
+
+function loadImg(src){ return new Promise((ok,err)=>{ const i=new Image(); i.crossOrigin='anonymous';
+  i.onload=()=>ok(i); i.onerror=err; i.src=src; }); }
+
+// хром-кей: серый фон -> прозрачно, насыщенный/яркий неон -> остаётся
+function keyOut(img, W, H){
+  const c=document.createElement('canvas'); c.width=W; c.height=H;
+  const x=c.getContext('2d'); x.drawImage(img,0,0,W,H);
+  const d=x.getImageData(0,0,W,H), p=d.data;
+  for(let i=0;i<p.length;i+=4){
+    const r=p[i],g=p[i+1],b=p[i+2];
+    const max=Math.max(r,g,b), min=Math.min(r,g,b);
+    const sat=max===0?0:(max-min)/max, val=max/255;
+    const aSat=Math.min(1,Math.max(0,(sat-0.12)/0.14));
+    const aVal=Math.min(1,Math.max(0,(val-0.82)/0.14));
+    p[i+3]=Math.round(Math.max(aSat,aVal)*255);
+  }
+  x.putImageData(d,0,0); return c;
+}
+// затемнённое «пустое» сердце (тёмно-бордовое, как верх картинки 3)
+function makeDark(keyed){
+  const c=document.createElement('canvas'); c.width=keyed.width; c.height=keyed.height;
+  const x=c.getContext('2d'); x.drawImage(keyed,0,0);
+  x.globalCompositeOperation='source-atop';
+  x.fillStyle='rgba(18,0,10,0.88)'; x.fillRect(0,0,c.width,c.height);
+  return c;
+}
+// неоновый ободок: эрозия силуэта -> остаётся только яркий контур (внутренность не трогаем)
+function makeRim(keyed){
+  const W=keyed.width,H=keyed.height,k=Math.round(W*0.014);
+  const c=document.createElement('canvas'); c.width=W; c.height=H;
+  const x=c.getContext('2d'); x.drawImage(keyed,0,0);           // яркое сердце
+  x.globalCompositeOperation='destination-out';
+  x.drawImage(keyed, k,k, W-2*k, H-2*k);                        // вырезаем внутренность -> кольцо-контур
+  x.globalCompositeOperation='source-over';
+  return c;
+}
+function alphaBounds(keyed){
+  const W=keyed.width,H=keyed.height;
+  const d=keyed.getContext('2d').getImageData(0,0,W,H).data;
+  let top=H,bot=0;
+  for(let y=0;y<H;y++){ let has=false;
+    for(let xx=0;xx<W;xx+=3){ if(d[(y*W+xx)*4+3]>60){has=true;break;} }
+    if(has){ if(y<top)top=y; if(y>bot)bot=y; } }
+  return {top,bot:bot||H};
+}
+
+let heart, darkHeart, mask, glow, bounds, W=SIZE, H=SIZE;
+let target=0.35, level=0.0;
+const bubbles=[];
+function initBubbles(){ bubbles.length=0;
+  for(let i=0;i<12;i++) bubbles.push({x:Math.random(),r:1.5+Math.random()*3.5,
+    y:Math.random(),sp:0.05+Math.random()*0.08,ph:Math.random()*6.28}); }
+
+const T = ()=>performance.now();
+
+// Интенсивность вспышки света, синхронно с CSS-биением (берём фазу прямо из анимации).
+function beatGlow(){
+  if(document.body.classList.contains('nopulse')) return 0;
+  const a = cv.getAnimations ? cv.getAnimations()[0] : null;
+  if(!a || a.currentTime==null) return 0;
+  const p = (a.currentTime % 2400) / 2400;          // фаза 0..1 (цикл 2.4с)
+  const g = (c,w)=>Math.exp(-((p-c)*(p-c))/(2*w*w));
+  return Math.min(1, g(0.11,0.05) + g(0.33,0.05)*0.6); // «тук» на 0.11, «дуб» на 0.33
+}
+
+function draw(){
+  const t=T();
+  ctx.clearRect(0,0,cv.width,cv.height);
+  if(!heart){ requestAnimationFrame(draw); return; }
+  level += (target-level)*0.06;
+
+  const HW=W, HH=H;
+  const bt=bounds.top/heart.height*HH, bb=bounds.bot/heart.height*HH;
+  const waterY = bb-(bb-bt)*level;
+  const amp = 6+2*Math.sin(t/900);
+  const k1=2*Math.PI/(HW*0.5), k2=2*Math.PI/(HW*0.28);
+  const waveY = xx => waterY + Math.sin(xx*k1+t/560)*amp + Math.sin(xx*k2 - t/380)*amp*0.5;
+
+  // 1) тёмное пустое сердце
+  ctx.drawImage(darkHeart,0,0,HW,HH);
+
+  // 2) вода = реальная яркая текстура, обрезанная снизу по волне
+  const tmp=draw._tmp||(draw._tmp=document.createElement('canvas'));
+  tmp.width=HW; tmp.height=HH; const tx=tmp.getContext('2d');
+  tx.clearRect(0,0,HW,HH);
+  tx.drawImage(heart,0,0,HW,HH);
+  tx.globalCompositeOperation='destination-in';    // оставить только ниже линии воды
+  tx.beginPath(); tx.moveTo(0,HH); tx.lineTo(0,waveY(0));
+  for(let xx=0;xx<=HW;xx+=5) tx.lineTo(xx,waveY(xx));
+  tx.lineTo(HW,HH); tx.closePath(); tx.fillStyle='#000'; tx.fill();
+  tx.globalCompositeOperation='source-atop';        // пузырьки только по воде
+  tx.fillStyle='rgba(255,255,255,.5)';
+  for(const b of bubbles){ b.y-=b.sp*0.016; if(b.y<0){b.y=1;b.x=Math.random();}
+    const px=(0.15+b.x*0.7)*HW+Math.sin(t/500+b.ph)*4;
+    const py=waterY+(bb-waterY)*b.y;
+    if(py>waveY(px)+3){ tx.beginPath(); tx.arc(px,py,b.r,0,6.29); tx.fill(); } }
+  tx.globalCompositeOperation='source-over';
+  ctx.drawImage(tmp,0,0);
+
+  // 2.5) еле заметный медленный перелив света внутри сердца — для «живости»
+  {
+    const sh = draw._sh || (draw._sh=document.createElement('canvas'));
+    sh.width=HW; sh.height=HH; const sx=sh.getContext('2d');
+    const st=t/1000;
+    const cx=HW*(0.5+0.26*Math.sin(st/5)), cy=HH*(0.44+0.20*Math.cos(st/6.5));  // медленный дрейф
+    const g=sx.createRadialGradient(cx,cy,0, cx,cy,HW*0.6);
+    g.addColorStop(0,'rgba(255,190,220,0.10)');
+    g.addColorStop(0.55,'rgba(255,120,180,0.035)');
+    g.addColorStop(1,'rgba(255,120,180,0)');
+    sx.fillStyle=g; sx.fillRect(0,0,HW,HH);
+    sx.globalCompositeOperation='destination-in'; sx.drawImage(mask,0,0,HW,HH);   // клип по сердцу
+    ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.drawImage(sh,0,0); ctx.restore();
+  }
+
+  // 3) неоновая волнистая линия воды (со свечением, обрезана по сердцу)
+  if(level>0.015){
+    const tl=draw._tl||(draw._tl=document.createElement('canvas'));
+    tl.width=HW; tl.height=HH; const lx=tl.getContext('2d');
+    lx.clearRect(0,0,HW,HH);
+    lx.beginPath();
+    for(let xx=0;xx<=HW;xx+=5){ const y=waveY(xx); xx===0?lx.moveTo(xx,y):lx.lineTo(xx,y); }
+    lx.strokeStyle='rgba(255,120,185,.9)'; lx.lineWidth=4;
+    lx.shadowColor='rgba(255,70,155,1)'; lx.shadowBlur=14; lx.stroke();
+    lx.shadowBlur=0; lx.strokeStyle='rgba(255,235,245,.98)'; lx.lineWidth=1.6; lx.stroke();
+    lx.globalCompositeOperation='destination-in'; lx.drawImage(mask,0,0,HW,HH);
+    ctx.drawImage(tl,0,0);
+  }
+
+  // 4) постоянно светящийся неоновый контур + мягкое сияние
+  ctx.save();
+  ctx.globalCompositeOperation='lighter';
+  ctx.shadowColor='rgba(255,45,130,.95)'; ctx.shadowBlur=22; ctx.drawImage(glow,0,0,HW,HH); // ореол
+  ctx.shadowBlur=0; ctx.drawImage(glow,0,0,HW,HH);                                           // чёткий контур
+  ctx.restore();
+
+  // всплеск света на удар — по контуру внутрь и наружу, синхронно с биением
+  const bg=beatGlow();
+  if(bg>0.02){
+    ctx.save();
+    ctx.globalCompositeOperation='lighter';
+    ctx.globalAlpha=0.35+0.55*bg;
+    ctx.shadowColor='rgba(255,90,170,'+(0.6+0.4*bg)+')';
+    ctx.shadowBlur=6+22*bg;
+    ctx.drawImage(glow,0,0,HW,HH);
+    ctx.restore();
+  }
+
+  requestAnimationFrame(draw);
+}
+
+async function main(){
+  const img = await loadImg(window.HEART_IMG || '2.png');
+  const R=700, rh=Math.round(R*img.height/img.width);
+  heart=keyOut(img,R,rh); darkHeart=makeDark(heart); mask=heart; glow=makeRim(heart);
+  bounds=alphaBounds(heart);
+  W=SIZE; H=Math.round(SIZE*rh/R);
+  const dpr=Math.min(2,window.devicePixelRatio||1);
+  cv.width=W*dpr; cv.height=H*dpr; cv.style.width=W+'px'; cv.style.height=H+'px'; ctx.scale(dpr,dpr);
+  initBubbles(); requestAnimationFrame(draw);
+}
+
+// ---------- контролы (панель — только для отладки) ----------
+let auto=false, live=false;
+const lvl=document.getElementById('lvl'), pct=document.getElementById('pct');
+function setTarget(v){ target=Math.max(0,Math.min(1,v));
+  pct&&(pct.textContent=Math.round(target*100)+'%'); lvl&&(lvl.value=Math.round(target*100)); }
+lvl&&lvl.addEventListener('input',()=>{ auto=false; live=false;
+  const a=document.getElementById('auto'); if(a){a.textContent='Авто-демо: выкл'; a.classList.add('off');}
+  setTarget(lvl.value/100); });
+document.getElementById('auto')&&document.getElementById('auto').addEventListener('click',e=>{
+  auto=!auto; live=false; e.target.textContent='Авто-демо: '+(auto?'вкл':'выкл'); e.target.classList.toggle('off',!auto); });
+document.getElementById('dbg')&&document.getElementById('dbg').addEventListener('click',()=>document.body.classList.toggle('debug'));
+setInterval(()=>{ if(auto){ setTarget(0.05+Math.random()*0.9); } }, 3500);
+
+// ---------- данные: живые из помощника (/goal) или ручной ?level ----------
+const fmt=n=>Math.round(n).toLocaleString('ru-RU');
+const curSym=c=>({RUB:'₽',USD:'$',EUR:'€',UAH:'₴',KZT:'₸',BYN:'Br'})[c]||c||'';
+const goalQuery = (()=>{ const q=[]; if(P.get('token'))q.push('token='+encodeURIComponent(P.get('token'))); if(P.get('goal'))q.push('goal='+encodeURIComponent(P.get('goal'))); return q.length?('?'+q.join('&')):''; })();
+async function poll(){
+  try{
+    const r=await fetch('/goal'+goalQuery,{cache:'no-store'}); if(!r.ok) throw 0;
+    const d=await r.json(); if(d.error||!(d.goal>0)) throw 0;
+    live=true; auto=false; setTarget(d.raised/d.goal);
+    amountEl.textContent=fmt(d.raised)+' / '+fmt(d.goal)+' '+curSym(d.currency);
+    if(titleOn){ titleEl.textContent=d.title||''; titleEl.classList.toggle('on', !!d.title); }
+    return true;
+  }catch(e){ return false; }
+}
+if(P.has('level')){                                   // ручной режим (одиночный файл, без помощника)
+  const v=(+P.get('level')||0)/100; setTarget(v); level=v;
+  const g=+(P.get('goal')||0);
+  amountEl.textContent = g>0 ? (fmt(g*v)+' / '+fmt(g)+' ₽') : (Math.round(v*100)+'%');
+  if(titleOn){ const tt=P.get('titletext')||''; titleEl.textContent=tt; titleEl.classList.toggle('on', !!tt); }
+} else {
+  poll().then(ok=>{
+    if(ok){ setInterval(poll,12000); }                // живые донаты (раз в 12 сек — экономно)
+    else if(!OBS){ auto=true; setTarget(0.35); }       // в браузере без помощника — авто-демо
+    else { setTarget(0); amountEl.textContent='нет связи с помощником'; }
+  });
+}
+
+main();
+</script>
+</body>
+</html>

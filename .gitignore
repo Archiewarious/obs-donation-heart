@@ -1,0 +1,16 @@
+# Секрет: личная ссылка с токеном DonationAlerts — НЕ публиковать!
+# Secret: personal DonationAlerts link with token — do NOT publish!
+ссылка-на-сбор.txt
+
+# Node
+node_modules/
+npm-debug.log*
+
+# ОС / OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Прочее / Misc
+*.log
+*.tmp

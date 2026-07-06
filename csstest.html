@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8"><title>CSS-сердце · превью</title>
+<style>
+  body{margin:0;background:#141018;min-height:100vh;font-family:Montserrat,Arial,sans-serif;color:#fff}
+  /* ползунок уровня (только в этом превью; в OBS уровень задаёт DA) */
+  .ctl{position:fixed;left:14px;bottom:14px;background:rgba(0,0,0,.6);padding:12px;border-radius:10px;z-index:99;width:240px}
+  .ctl input{width:100%}
+
+  /* ====== НИЖЕ — ровно тот CSS, что идёт в OBS ====== */
+  :root{ --size:340px; --water-dark:#ff147d; --water-mid:#ff49a0; --water-light:#ff9dd0; --neon:#ff2d84; }
+  #widget-app .widget-goal.horizontal{width:var(--size)!important;height:var(--size)!important;margin:24px auto!important;position:relative!important;display:block!important;overflow:visible!important}
+  #widget-app .goal-header,#widget-app .goal-footer{display:none!important}
+  #widget-app .goal-body{width:var(--size)!important;height:var(--size)!important;position:relative!important;margin:0 auto!important;padding:0!important;overflow:visible!important}
+  #widget-app .goal-progress-bar{position:absolute!important;left:0!important;top:0!important;width:var(--size)!important;height:var(--size)!important;
+    background:linear-gradient(180deg,rgba(255,90,160,.10),rgba(90,8,40,.30))!important;border:0!important;min-height:0!important;border-radius:0!important;overflow:hidden!important;
+    -webkit-mask:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='-4%20-3%2040%2033'%3E%3Cpath%20d='M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2c6.1-9.3,16-12.1,16-21.2C32,3.8,28.2,0,23.6,0z'%20fill='%23000'/%3E%3C/svg%3E") center bottom/contain no-repeat!important;
+            mask:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='-4%20-3%2040%2033'%3E%3Cpath%20d='M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2c6.1-9.3,16-12.1,16-21.2C32,3.8,28.2,0,23.6,0z'%20fill='%23000'/%3E%3C/svg%3E") center bottom/contain no-repeat!important}
+  #widget-app .progress-bar-filler.horizontal{left:0!important;top:0!important;bottom:auto!important;width:auto!important;height:var(--size)!important;
+    background-image:linear-gradient(115deg,transparent 42%,rgba(255,255,255,.4) 50%,transparent 58%),linear-gradient(to right,var(--water-dark),var(--water-mid) 55%,var(--water-light))!important;
+    background-size:260px 100%,100% 100%!important;background-repeat:no-repeat!important;box-shadow:0 0 26px rgba(255,45,140,.65)!important;
+    transform-origin:0 0!important;transform:translateY(var(--size)) rotate(-90deg)!important;
+    animation:obsheart-shimmer 3s linear infinite,obsheart-bob 4.5s ease-in-out infinite!important}
+  #widget-app .goal-body::after{content:''!important;position:absolute!important;inset:0!important;pointer-events:none!important;z-index:4!important;
+    background:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='-4%20-3%2040%2033'%3E%3Cpath%20d='M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2c6.1-9.3,16-12.1,16-21.2C32,3.8,28.2,0,23.6,0z'%20fill='none'%20stroke='%23ff5fa8'%20stroke-width='1.1'/%3E%3C/svg%3E") center bottom/contain no-repeat!important;
+    animation:obsheart-glow 2.6s ease-in-out infinite!important}
+  #widget-app .goal-progress-text.goal-text{position:absolute!important;left:0!important;right:auto!important;top:calc(var(--size) + 6px)!important;width:var(--size)!important;text-align:center!important;z-index:5!important;font-weight:800!important;font-size:22px!important}
+  @keyframes obsheart-shimmer{0%{background-position:-260px 0,0 0}100%{background-position:260px 0,0 0}}
+  @keyframes obsheart-bob{0%,100%{border-radius:0 22px 22px 0}50%{border-radius:0 40px 40px 0}}
+  @keyframes obsheart-glow{0%,100%{filter:drop-shadow(0 0 4px var(--neon)) drop-shadow(0 0 12px rgba(255,60,150,.8))}50%{filter:drop-shadow(0 0 8px var(--neon)) drop-shadow(0 0 22px rgba(255,60,150,1))}}
+</style></head>
+<body>
+<!-- копия структуры виджета DonationAlerts -->
+<div id="widget-app"><div class="widget-layout"><div class="widget-goal horizontal">
+  <div class="goal-header"></div>
+  <div class="goal-body">
+    <div class="goal-progress-bar">
+      <div class="progress-bar-filler horizontal" style="background-color:rgb(224,0,0);right:96%;transition:right 1s ease"></div>
+    </div>
+    <div class="goal-progress-text goal-text"><div class="flat-text">538 / 12 222 RUB</div></div>
+  </div>
+  <div class="goal-footer"></div>
+</div></div></div>
+
+<div class="ctl">Уровень: <span id="v">4</span>%<br><input id="s" type="range" min="0" max="100" value="4"></div>
+<script>
+  const f=document.querySelector('.progress-bar-filler'), s=document.getElementById('s'), v=document.getElementById('v');
+  s.addEventListener('input',()=>{ v.textContent=s.value; f.style.setProperty('right',(100-s.value)+'%','important'); });
+</script>
+</body></html>

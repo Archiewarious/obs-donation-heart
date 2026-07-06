@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <title>Сердце-донат · прототип</title>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
   html,body{margin:0;height:100%;background:transparent;overflow:hidden;
     font-family:Montserrat,Arial,sans-serif;color:#fff}
   body.debug{background:#15151b}                 /* тёмная подложка только для отладки */
@@ -58,6 +59,7 @@
 const P = new URLSearchParams(location.search);
 const OBS = P.has('obs');
 const SIZE = +(P.get('size') || 440);
+const showPct = P.get('percent')!=='0';         // процент внутри сердца (спрятать — ?percent=0)
 if (P.has('debug')) document.body.classList.add('debug');
 if (P.get('pulse')==='0') document.body.classList.add('nopulse');   // ?pulse=0 — выключить биение
 if (OBS) document.getElementById('panel').classList.add('hidden');
@@ -215,10 +217,26 @@ function draw(){
     ctx.restore();
   }
 
+  // 5) процент собранного — внутри сердца, красивым шрифтом
+  if(showPct){
+    const fs=Math.round(HW*0.20), txt=Math.round(level*100)+'%';
+    const px=HW/2, py=HH*0.46;
+    ctx.save();
+    ctx.font=fs+"px 'Pacifico', Montserrat, sans-serif";
+    ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.lineJoin='round';
+    ctx.lineWidth=Math.max(3,fs*0.12); ctx.strokeStyle='rgba(85,0,38,0.85)';
+    ctx.strokeText(txt,px,py);
+    ctx.shadowColor='rgba(255,70,160,0.9)'; ctx.shadowBlur=fs*0.3;
+    ctx.fillStyle='#fff';
+    ctx.fillText(txt,px,py);
+    ctx.restore();
+  }
+
   requestAnimationFrame(draw);
 }
 
 async function main(){
+  try{ if(document.fonts&&document.fonts.load) await document.fonts.load("30px 'Pacifico'"); }catch(e){}
   const img = await loadImg(window.HEART_IMG || '2.png');
   const R=700, rh=Math.round(R*img.height/img.width);
   heart=keyOut(img,R,rh); darkHeart=makeDark(heart); mask=heart; glow=makeRim(heart);

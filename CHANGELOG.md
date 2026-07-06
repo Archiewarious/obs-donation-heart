@@ -4,6 +4,12 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 project follows [Semantic Versioning](https://semver.org/).
 
+## [1.1.0] — 2026-07-07
+### Added
+- Collected percentage shown **inside the heart** in a decorative font (Pacifico). Hide with `&percent=0`.
+### Changed
+- Config file renamed to `link.txt` (from `goal-link.txt`); template `link.example.txt`. Just paste the link — no comments.
+
 ## [1.0.1] — 2026-07-07
 ### Changed
 - Renamed files to English: config file is now `goal-link.txt` (from `ссылка-на-сбор.txt`),

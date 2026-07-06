@@ -29,7 +29,7 @@
 ### Установка и настройка (один раз)
 1. Скачай/клонируй проект в любую папку.
 2. Установи **Node.js** (LTS) с https://nodejs.org.
-3. Создай файл со ссылкой сбора: скопируй `ссылка-на-сбор.example.txt` → переименуй в **`ссылка-на-сбор.txt`** и вставь туда ссылку своего виджета-цели DonationAlerts
+3. Создай файл со ссылкой сбора: скопируй `goal-link.example.txt` → переименуй в **`goal-link.txt`** и вставь туда ссылку своего виджета-цели DonationAlerts
    (вида `https://www.donationalerts.com/widget/goal/ЧИСЛО?token=...`).
 4. В OBS: **Инструменты → Скрипты → «+»** → выбери `heart-helper.lua`.
 5. В OBS добавь **Браузер-источник**:
@@ -38,7 +38,7 @@
 6. Всё. Дальше просто открывай OBS как обычно — помощник поднимается сам.
 
 ### Сменить сбор
-Открой `ссылка-на-сбор.txt`, вставь новую ссылку, сохрани. Обновится за ~12 сек. Название и сумма подтянутся сами.
+Открой `goal-link.txt`, вставь новую ссылку, сохрани. Обновится за ~12 сек. Название и сумма подтянутся сами.
 
 ### Параметры ссылки (в URL источника)
 | Параметр | Что делает |
@@ -83,7 +83,7 @@ An OBS widget: your heart image fills with water from the bottom up, proportiona
 ### Install & setup (once)
 1. Download/clone the project into any folder.
 2. Install **Node.js** (LTS) from https://nodejs.org.
-3. Create the goal-link file: copy `ссылка-на-сбор.example.txt` → rename it to **`ссылка-на-сбор.txt`** and paste the link to your DonationAlerts goal widget
+3. Create the goal-link file: copy `goal-link.example.txt` → rename it to **`goal-link.txt`** and paste the link to your DonationAlerts goal widget
    (like `https://www.donationalerts.com/widget/goal/NUMBER?token=...`).
 4. In OBS: **Tools → Scripts → “+”** → pick `heart-helper.lua`.
 5. In OBS add a **Browser source**:
@@ -92,7 +92,7 @@ An OBS widget: your heart image fills with water from the bottom up, proportiona
 6. Done. Just open OBS normally — the helper starts on its own.
 
 ### Change the collection
-Open `ссылка-на-сбор.txt` (means “goal link”), paste a new link, save. Updates within ~12 s. Title and amount follow automatically.
+Open `goal-link.txt`, paste a new link, save. Updates within ~12 s. Title and amount follow automatically.
 
 ### URL options (on the source URL)
 | Option | Effect |

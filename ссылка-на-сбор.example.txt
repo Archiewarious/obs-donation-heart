@@ -1,7 +1,0 @@
-Это ПРИМЕР. Скопируй файл рядом с именем  ссылка-на-сбор.txt
-и вставь ссылку своего виджета-цели DonationAlerts (одной строкой).
-
-This is an EXAMPLE. Copy it next to it as  ссылка-на-сбор.txt
-and paste the link to YOUR DonationAlerts goal widget (one line).
-
-https://www.donationalerts.com/widget/goal/000000?token=YOUR_TOKEN_HERE

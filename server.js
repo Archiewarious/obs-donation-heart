@@ -45,9 +45,9 @@ const MIME = { '.html':'text/html; charset=utf-8', '.js':'text/javascript', '.cs
 
 const DA = 'https://www.donationalerts.com';
 const bearers = {};                 // кэш bearer-токенов по widget-токену
-const LINK_FILE = 'ссылка-на-сбор.txt';
+const LINK_FILE = 'goal-link.txt';
 
-// Берём token и номер цели прямо из ссылки в файле "ссылка-на-сбор.txt".
+// Берём token и номер цели прямо из ссылки в файле "goal-link.txt".
 // Чтобы сменить сбор — просто вставь туда новую ссылку и сохрани. Перезапуск не нужен.
 function readConfig(){
   try{

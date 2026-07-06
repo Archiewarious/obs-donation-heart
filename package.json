@@ -1,6 +1,6 @@
 {
   "name": "obs-donation-heart",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Live OBS donation widget: a neon heart that fills with animated water as a DonationAlerts goal progresses. / Живой донат-виджет для OBS: неоновое сердце, наполняющееся водой по мере сбора на DonationAlerts.",
   "scripts": {
     "start": "node server.js",

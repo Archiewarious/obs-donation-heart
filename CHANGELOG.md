@@ -4,10 +4,17 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 project follows [Semantic Versioning](https://semver.org/).
 
+## [1.0.1] — 2026-07-07
+### Changed
+- Renamed files to English: config file is now `goal-link.txt` (from `ссылка-на-сбор.txt`),
+  template `goal-link.example.txt`.
+- The link file now contains just the link — no comments needed.
+- Removed the redundant `ИНСТРУКЦИЯ.txt` (the bilingual README covers everything).
+
 ## [1.0.0] — 2026-07-07
 ### Added
 - Neon heart widget that fills with animated water as a DonationAlerts goal progresses.
-- Live goal data via a lightweight local helper (`server.js`); token/goal read from `ссылка-на-сбор.txt`.
+- Live goal data via a lightweight local helper (`server.js`); token/goal read from `goal-link.txt`.
 - OBS integration: `heart-helper.lua` starts the helper together with OBS; the helper
   shuts itself down ~15 s after OBS closes (no background process when not streaming).
 - Visual effects: subtle heartbeat pulse, synced glow burst (inner + outer), slow inner light shimmer.

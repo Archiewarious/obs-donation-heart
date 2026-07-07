@@ -4,6 +4,10 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 project follows [Semantic Versioning](https://semver.org/).
 
+## [1.1.1] — 2026-07-07
+### Changed
+- Restyled the percentage inside the heart: thin clean font (Montserrat ExtraLight), smaller, understated and exactly centered. Replaced the decorative script font.
+
 ## [1.1.0] — 2026-07-07
 ### Added
 - Collected percentage shown **inside the heart** in a decorative font (Pacifico). Hide with `&percent=0`.

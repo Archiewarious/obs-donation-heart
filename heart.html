@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>Сердце-донат · прототип</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;800&display=swap');
   html,body{margin:0;height:100%;background:transparent;overflow:hidden;
     font-family:Montserrat,Arial,sans-serif;color:#fff}
   body.debug{background:#15151b}                 /* тёмная подложка только для отладки */
@@ -216,17 +216,17 @@ function draw(){
     ctx.restore();
   }
 
-  // 5) процент собранного — внутри сердца, красивым шрифтом
+  // 5) процент собранного — внутри сердца, тонким чистым шрифтом
   if(showPct){
-    const fs=Math.round(HW*0.20), txt=Math.round(level*100)+'%';
-    const px=HW/2, py=HH*0.46;
+    const fs=Math.round(HW*0.095), txt=Math.round(level*100)+'%';
+    const px=HW/2, py=(bt+bb)/2;        // ровно по центру силуэта сердца
     ctx.save();
-    ctx.font=fs+"px 'Pacifico', Montserrat, sans-serif";
-    ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.lineJoin='round';
-    ctx.lineWidth=Math.max(3,fs*0.12); ctx.strokeStyle='rgba(85,0,38,0.85)';
-    ctx.strokeText(txt,px,py);
-    ctx.shadowColor='rgba(255,70,160,0.9)'; ctx.shadowBlur=fs*0.3;
-    ctx.fillStyle='#fff';
+    ctx.font="200 "+fs+"px Montserrat, Arial, sans-serif";
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    try{ ctx.letterSpacing=Math.round(fs*0.02)+'px'; }catch(e){}
+    // скромно, без акцента: лёгкая тень для читаемости, полупрозрачный белый
+    ctx.shadowColor='rgba(25,0,12,0.5)'; ctx.shadowOffsetY=1; ctx.shadowBlur=fs*0.07;
+    ctx.fillStyle='rgba(255,255,255,0.8)';
     ctx.fillText(txt,px,py);
     ctx.restore();
   }
@@ -235,7 +235,7 @@ function draw(){
 }
 
 async function main(){
-  try{ if(document.fonts&&document.fonts.load) await document.fonts.load("30px 'Pacifico'"); }catch(e){}
+  try{ if(document.fonts&&document.fonts.load) await document.fonts.load("200 40px Montserrat"); }catch(e){}
   const img = await loadImg(window.HEART_IMG || '2.png');
   const R=700, rh=Math.round(R*img.height/img.width);
   heart=keyOut(img,R,rh); darkHeart=makeDark(heart); mask=heart; glow=makeRim(heart);

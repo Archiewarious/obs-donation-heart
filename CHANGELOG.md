@@ -4,6 +4,11 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 project follows [Semantic Versioning](https://semver.org/).
 
+## [1.4.0] — 2026-07-14
+### Added
+- Twinkling star sparkles inside the water (flash and fade).
+- 3D volume: soft glass highlight on top + inner edge vignette.
+
 ## [1.3.0] — 2026-07-14
 ### Added
 - Second translucent wave behind the main one — water gets visual depth.

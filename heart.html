@@ -105,6 +105,32 @@ function makeRim(keyed){
   x.globalCompositeOperation='source-over';
   return c;
 }
+// стеклянный блик сверху (3D-объём), обрезан по сердцу
+function makeGloss(keyed){
+  const W=keyed.width,H=keyed.height;
+  const c=document.createElement('canvas'); c.width=W; c.height=H;
+  const x=c.getContext('2d');
+  const g=x.createRadialGradient(W*0.5,H*0.12,W*0.04, W*0.5,H*0.24,W*0.42);
+  g.addColorStop(0,'rgba(255,255,255,0.12)');
+  g.addColorStop(0.5,'rgba(255,255,255,0.035)');
+  g.addColorStop(1,'rgba(255,255,255,0)');
+  x.fillStyle=g; x.fillRect(0,0,W,H);
+  x.globalCompositeOperation='destination-in'; x.drawImage(keyed,0,0);
+  return c;
+}
+// затемнение к краям силуэта (внутренняя виньетка -> объём)
+function makeVignette(keyed){
+  const W=keyed.width,H=keyed.height;
+  const c=document.createElement('canvas'); c.width=W; c.height=H;
+  const x=c.getContext('2d');
+  const g=x.createRadialGradient(W*0.5,H*0.42,W*0.18, W*0.5,H*0.5,W*0.62);
+  g.addColorStop(0,'rgba(0,0,0,0)');
+  g.addColorStop(0.75,'rgba(40,0,22,0.18)');
+  g.addColorStop(1,'rgba(40,0,22,0.42)');
+  x.fillStyle=g; x.fillRect(0,0,W,H);
+  x.globalCompositeOperation='destination-in'; x.drawImage(keyed,0,0);
+  return c;
+}
 function alphaBounds(keyed){
   const W=keyed.width,H=keyed.height;
   const d=keyed.getContext('2d').getImageData(0,0,W,H).data;
@@ -115,7 +141,8 @@ function alphaBounds(keyed){
   return {top,bot:bot||H};
 }
 
-let heart, darkHeart, mask, glow, bounds, W=SIZE, H=SIZE;
+let heart, darkHeart, mask, glow, gloss, vign, bounds, W=SIZE, H=SIZE;
+const winks=[];                    // мерцающие блёстки в воде
 let target=0.35, level=0.0;
 const bubbles=[];
 const drops=[], sparks=[];        // капли всплеска и искорки над водой
@@ -175,6 +202,19 @@ function draw(){
     const px=(0.15+b.x*0.7)*HW+Math.sin(t/500+b.ph)*4;
     const py=waterY+(bb-waterY)*b.y;
     if(py>waveY(px)+3){ tx.beginPath(); tx.arc(px,py,b.r,0,6.29); tx.fill(); } }
+  // мерцающие блёстки: вспыхивают и тают в толще воды
+  if(winks.length<22 && Math.random()<0.3)
+    winks.push({x:HW*(0.12+Math.random()*0.76), y:waterY+( bb-waterY)*Math.random(), life:0, max:30+Math.random()*50, r:0.8+Math.random()*1.6});
+  for(let i=winks.length-1;i>=0;i--){ const s=winks[i]; s.life++;
+    if(s.life>=s.max){ winks.splice(i,1); continue; }
+    if(s.y<waveY(s.x)+3) continue;
+    const a=Math.sin(Math.PI*s.life/s.max);
+    tx.globalAlpha=a*0.9; tx.fillStyle='#fff';
+    tx.beginPath(); tx.arc(s.x,s.y,s.r,0,6.29); tx.fill();
+    tx.globalAlpha=a*0.5; tx.fillRect(s.x-s.r*3,s.y-0.4,s.r*6,0.8);   // лучики-крест
+    tx.fillRect(s.x-0.4,s.y-s.r*3,0.8,s.r*6);
+  }
+  tx.globalAlpha=1;
   tx.globalCompositeOperation='source-over';
   ctx.drawImage(tmp,0,0);
 
@@ -238,6 +278,13 @@ function draw(){
     ctx.drawImage(tl,0,0);
   }
 
+  // 3.5) 3D-объём: затемнение к краям + стеклянный блик сверху (медленно «дышит»)
+  ctx.save(); ctx.globalCompositeOperation='multiply'; ctx.drawImage(vign,0,0,HW,HH); ctx.restore();
+  ctx.save(); ctx.globalCompositeOperation='lighter';
+  ctx.globalAlpha=0.85+0.15*Math.sin(t/1700);
+  ctx.drawImage(gloss,0,Math.sin(t/2300)*2,HW,HH);
+  ctx.restore();
+
   // 4) постоянно светящийся неоновый контур + мягкое сияние
   ctx.save();
   ctx.globalCompositeOperation='lighter';
@@ -280,6 +327,7 @@ async function main(){
   const img = await loadImg(window.HEART_IMG || '2.png');
   const R=700, rh=Math.round(R*img.height/img.width);
   heart=keyOut(img,R,rh); darkHeart=makeDark(heart); mask=heart; glow=makeRim(heart);
+  gloss=makeGloss(heart); vign=makeVignette(heart);
   bounds=alphaBounds(heart);
   W=SIZE; H=Math.round(SIZE*rh/R);
   const dpr=Math.min(2,window.devicePixelRatio||1);

@@ -149,6 +149,11 @@ function draw(){
   burst*=0.985;                              // донат-всплеск плавно гаснет
   const kick=Math.min(1, bg + burst*1.2);    // общий «толчок»: удар сердца + новый донат
   const amp = 6+2*Math.sin(t/900) + 11*kick; // на ударе волна ощутимо всплёскивает
+
+  // на донат сердце разово «стукает» сильнее (масштаб всей отрисовки)
+  ctx.save();
+  const ds=1+0.05*burst;
+  ctx.translate(W/2,H/2); ctx.scale(ds,ds); ctx.translate(-W/2,-H/2);
   const k1=2*Math.PI/(HW*0.5), k2=2*Math.PI/(HW*0.28);
   const waveY = xx => waterY + Math.sin(xx*k1+t/560)*amp + Math.sin(xx*k2 - t/380)*amp*0.5;
 
@@ -193,6 +198,12 @@ function draw(){
     const tl=draw._tl||(draw._tl=document.createElement('canvas'));
     tl.width=HW; tl.height=HH; const lx=tl.getContext('2d');
     lx.clearRect(0,0,HW,HH);
+    // задняя волна (сдвиг фазы) — полупрозрачная, даёт глубину воды
+    const waveY2 = xx => waterY + Math.sin(xx*k1+t/560+2.1)*amp*0.75 + Math.sin(xx*k2-t/380+1.2)*amp*0.4 - amp*0.35;
+    lx.beginPath(); lx.moveTo(0,HH); lx.lineTo(0,waveY2(0));
+    for(let xx=0;xx<=HW;xx+=6) lx.lineTo(xx,waveY2(xx));
+    lx.lineTo(HW,HH); lx.closePath();
+    lx.fillStyle='rgba(255,80,160,0.22)'; lx.fill();
     lx.beginPath();
     for(let xx=0;xx<=HW;xx+=5){ const y=waveY(xx); xx===0?lx.moveTo(xx,y):lx.lineTo(xx,y); }
     lx.strokeStyle='rgba(255,120,185,.9)'; lx.lineWidth=4;
@@ -208,7 +219,9 @@ function draw(){
       d.x+=d.vx; d.y+=d.vy; d.vy+=0.16; d.a-=0.012;
       if(d.a<=0 || d.y>waveY(d.x)+8){ drops.splice(i,1); continue; }
       lx.globalAlpha=d.a; lx.fillStyle='rgba(255,190,225,.95)';
+      lx.shadowColor='rgba(255,80,165,.9)'; lx.shadowBlur=7;
       lx.beginPath(); lx.arc(d.x,d.y,d.r,0,6.29); lx.fill();
+      lx.shadowBlur=0;
     }
     // искорки: редкие светлячки поднимаются от поверхности и тают
     if(Math.random()<0.05){ const sx=HW*(0.2+Math.random()*0.6);
@@ -258,6 +271,7 @@ function draw(){
     ctx.restore();
   }
 
+  ctx.restore();   // конец «стука» (масштаба кадра)
   requestAnimationFrame(draw);
 }
 

@@ -4,6 +4,12 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 project follows [Semantic Versioning](https://semver.org/).
 
+## [1.3.0] — 2026-07-14
+### Added
+- Second translucent wave behind the main one — water gets visual depth.
+- Donation "thump": on a new donation the heart itself kicks harder (one-off scale pulse).
+- Droplets now glow softly, visible over bright water too.
+
 ## [1.2.0] — 2026-07-14
 ### Added
 - Waves now splash in sync with the heartbeat (amplitude jumps on each beat).

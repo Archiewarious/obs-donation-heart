@@ -118,6 +118,8 @@ function alphaBounds(keyed){
 let heart, darkHeart, mask, glow, bounds, W=SIZE, H=SIZE;
 let target=0.35, level=0.0;
 const bubbles=[];
+const drops=[], sparks=[];        // капли всплеска и искорки над водой
+let burst=0, lastRaised=null;      // burst=1 при новом донате, плавно гаснет
 function initBubbles(){ bubbles.length=0;
   for(let i=0;i<12;i++) bubbles.push({x:Math.random(),r:1.5+Math.random()*3.5,
     y:Math.random(),sp:0.05+Math.random()*0.08,ph:Math.random()*6.28}); }
@@ -143,7 +145,10 @@ function draw(){
   const HW=W, HH=H;
   const bt=bounds.top/heart.height*HH, bb=bounds.bot/heart.height*HH;
   const waterY = bb-(bb-bt)*level;
-  const amp = 6+2*Math.sin(t/900);
+  const bg=beatGlow();                       // фаза удара 0..1 — волны и свет в такт
+  burst*=0.985;                              // донат-всплеск плавно гаснет
+  const kick=Math.min(1, bg + burst*1.2);    // общий «толчок»: удар сердца + новый донат
+  const amp = 6+2*Math.sin(t/900) + 11*kick; // на ударе волна ощутимо всплёскивает
   const k1=2*Math.PI/(HW*0.5), k2=2*Math.PI/(HW*0.28);
   const waveY = xx => waterY + Math.sin(xx*k1+t/560)*amp + Math.sin(xx*k2 - t/380)*amp*0.5;
 
@@ -161,7 +166,7 @@ function draw(){
   tx.lineTo(HW,HH); tx.closePath(); tx.fillStyle='#000'; tx.fill();
   tx.globalCompositeOperation='source-atop';        // пузырьки только по воде
   tx.fillStyle='rgba(255,255,255,.5)';
-  for(const b of bubbles){ b.y-=b.sp*0.016; if(b.y<0){b.y=1;b.x=Math.random();}
+  for(const b of bubbles){ b.y-=b.sp*0.016*(1+0.9*kick); if(b.y<0){b.y=1;b.x=Math.random();}
     const px=(0.15+b.x*0.7)*HW+Math.sin(t/500+b.ph)*4;
     const py=waterY+(bb-waterY)*b.y;
     if(py>waveY(px)+3){ tx.beginPath(); tx.arc(px,py,b.r,0,6.29); tx.fill(); } }
@@ -191,8 +196,31 @@ function draw(){
     lx.beginPath();
     for(let xx=0;xx<=HW;xx+=5){ const y=waveY(xx); xx===0?lx.moveTo(xx,y):lx.lineTo(xx,y); }
     lx.strokeStyle='rgba(255,120,185,.9)'; lx.lineWidth=4;
-    lx.shadowColor='rgba(255,70,155,1)'; lx.shadowBlur=14; lx.stroke();
+    lx.shadowColor='rgba(255,70,155,1)'; lx.shadowBlur=14+18*kick; lx.stroke();
     lx.shadowBlur=0; lx.strokeStyle='rgba(255,235,245,.98)'; lx.lineWidth=1.6; lx.stroke();
+
+    // капли: на сильном толчке отрываются от гребней и падают обратно
+    if(kick>0.45 && Math.random()<0.35+0.5*burst){
+      const dx=HW*(0.2+Math.random()*0.6);
+      drops.push({x:dx, y:waveY(dx)-2, vx:(Math.random()-.5)*1.6, vy:-(1.8+Math.random()*2.2+2*burst), r:1.2+Math.random()*2, a:1});
+    }
+    for(let i=drops.length-1;i>=0;i--){ const d=drops[i];
+      d.x+=d.vx; d.y+=d.vy; d.vy+=0.16; d.a-=0.012;
+      if(d.a<=0 || d.y>waveY(d.x)+8){ drops.splice(i,1); continue; }
+      lx.globalAlpha=d.a; lx.fillStyle='rgba(255,190,225,.95)';
+      lx.beginPath(); lx.arc(d.x,d.y,d.r,0,6.29); lx.fill();
+    }
+    // искорки: редкие светлячки поднимаются от поверхности и тают
+    if(Math.random()<0.05){ const sx=HW*(0.2+Math.random()*0.6);
+      sparks.push({x:sx, y:waveY(sx)-4, vy:-(0.25+Math.random()*0.35), a:0.8, r:0.8+Math.random()*1.2}); }
+    for(let i=sparks.length-1;i>=0;i--){ const s=sparks[i];
+      s.y+=s.vy; s.a-=0.006; s.x+=Math.sin(t/400+s.y)*0.15;
+      if(s.a<=0){ sparks.splice(i,1); continue; }
+      lx.globalAlpha=s.a; lx.fillStyle='rgba(255,215,235,.9)';
+      lx.beginPath(); lx.arc(s.x,s.y,s.r,0,6.29); lx.fill();
+    }
+    lx.globalAlpha=1;
+
     lx.globalCompositeOperation='destination-in'; lx.drawImage(mask,0,0,HW,HH);
     ctx.drawImage(tl,0,0);
   }
@@ -204,14 +232,13 @@ function draw(){
   ctx.shadowBlur=0; ctx.drawImage(glow,0,0,HW,HH);                                           // чёткий контур
   ctx.restore();
 
-  // всплеск света на удар — по контуру внутрь и наружу, синхронно с биением
-  const bg=beatGlow();
-  if(bg>0.02){
+  // всплеск света на удар/донат — по контуру внутрь и наружу
+  if(kick>0.02){
     ctx.save();
     ctx.globalCompositeOperation='lighter';
-    ctx.globalAlpha=0.35+0.55*bg;
-    ctx.shadowColor='rgba(255,90,170,'+(0.6+0.4*bg)+')';
-    ctx.shadowBlur=6+22*bg;
+    ctx.globalAlpha=0.35+0.55*kick;
+    ctx.shadowColor='rgba(255,90,170,'+(0.6+0.4*kick)+')';
+    ctx.shadowBlur=6+22*kick;
     ctx.drawImage(glow,0,0,HW,HH);
     ctx.restore();
   }
@@ -268,6 +295,8 @@ async function poll(){
     const r=await fetch('/goal'+goalQuery,{cache:'no-store'}); if(!r.ok) throw 0;
     const d=await r.json(); if(d.error||!(d.goal>0)) throw 0;
     live=true; auto=false; setTarget(d.raised/d.goal);
+    if(lastRaised!==null && d.raised>lastRaised) burst=1;   // новый донат — всплеск!
+    lastRaised=d.raised;
     amountEl.textContent=fmt(d.raised)+' / '+fmt(d.goal)+' '+curSym(d.currency);
     if(titleOn){ titleEl.textContent=d.title||''; titleEl.classList.toggle('on', !!d.title); }
     return true;

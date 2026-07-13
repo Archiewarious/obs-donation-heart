@@ -4,6 +4,14 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 project follows [Semantic Versioning](https://semver.org/).
 
+## [1.2.0] — 2026-07-14
+### Added
+- Waves now splash in sync with the heartbeat (amplitude jumps on each beat).
+- Droplets fly off the wave crests on strong beats and fall back.
+- Rare sparkles rise from the water surface and fade.
+- Donation burst: when the raised amount grows, a big one-off splash — high wave,
+  extra droplets, bright glow on the outline and water line.
+
 ## [1.1.1] — 2026-07-07
 ### Changed
 - Restyled the percentage inside the heart: thin clean font (Montserrat ExtraLight), smaller, understated and exactly centered. Replaced the decorative script font.

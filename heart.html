@@ -202,19 +202,6 @@ function draw(){
     const px=(0.15+b.x*0.7)*HW+Math.sin(t/500+b.ph)*4;
     const py=waterY+(bb-waterY)*b.y;
     if(py>waveY(px)+3){ tx.beginPath(); tx.arc(px,py,b.r,0,6.29); tx.fill(); } }
-  // мерцающие блёстки: вспыхивают и тают в толще воды
-  if(winks.length<22 && Math.random()<0.3)
-    winks.push({x:HW*(0.12+Math.random()*0.76), y:waterY+( bb-waterY)*Math.random(), life:0, max:30+Math.random()*50, r:0.8+Math.random()*1.6});
-  for(let i=winks.length-1;i>=0;i--){ const s=winks[i]; s.life++;
-    if(s.life>=s.max){ winks.splice(i,1); continue; }
-    if(s.y<waveY(s.x)+3) continue;
-    const a=Math.sin(Math.PI*s.life/s.max);
-    tx.globalAlpha=a*0.9; tx.fillStyle='#fff';
-    tx.beginPath(); tx.arc(s.x,s.y,s.r,0,6.29); tx.fill();
-    tx.globalAlpha=a*0.5; tx.fillRect(s.x-s.r*3,s.y-0.4,s.r*6,0.8);   // лучики-крест
-    tx.fillRect(s.x-0.4,s.y-s.r*3,0.8,s.r*6);
-  }
-  tx.globalAlpha=1;
   tx.globalCompositeOperation='source-over';
   ctx.drawImage(tmp,0,0);
 
@@ -276,6 +263,29 @@ function draw(){
 
     lx.globalCompositeOperation='destination-in'; lx.drawImage(mask,0,0,HW,HH);
     ctx.drawImage(tl,0,0);
+  }
+
+  // 3.4) лёгкие блёстки летают по всему сердцу (и в тёмной части)
+  {
+    if(winks.length<26 && Math.random()<0.35)
+      winks.push({x:HW*(0.08+Math.random()*0.84), y:bt+(bb-bt)*Math.random(),
+        vy:-(0.08+Math.random()*0.22), ph:Math.random()*6.28,
+        life:0, max:90+Math.random()*140, r:0.7+Math.random()*1.5});
+    const wk=draw._wk||(draw._wk=document.createElement('canvas'));
+    wk.width=HW; wk.height=HH; const wx=wk.getContext('2d');
+    for(let i=winks.length-1;i>=0;i--){ const s=winks[i]; s.life++;
+      s.y+=s.vy; s.x+=Math.sin(t/700+s.ph)*0.25;          // парение и покачивание
+      if(s.life>=s.max || s.y<bt){ winks.splice(i,1); continue; }
+      const a=Math.sin(Math.PI*s.life/s.max);
+      wx.globalAlpha=a*0.85; wx.fillStyle='#fff';
+      wx.beginPath(); wx.arc(s.x,s.y,s.r,0,6.29); wx.fill();
+      wx.globalAlpha=a*0.4;
+      wx.fillRect(s.x-s.r*3,s.y-0.4,s.r*6,0.8);            // лучики-крест
+      wx.fillRect(s.x-0.4,s.y-s.r*3,0.8,s.r*6);
+    }
+    wx.globalAlpha=1;
+    wx.globalCompositeOperation='destination-in'; wx.drawImage(mask,0,0,HW,HH);
+    ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.drawImage(wk,0,0); ctx.restore();
   }
 
   // 3.5) 3D-объём: затемнение к краям + стеклянный блик сверху (медленно «дышит»)

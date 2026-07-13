@@ -4,6 +4,11 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 project follows [Semantic Versioning](https://semver.org/).
 
+## [1.4.1] — 2026-07-14
+### Changed
+- Sparkles now float across the whole heart (dark part too), gently drifting upward,
+  instead of appearing only inside the water.
+
 ## [1.4.0] — 2026-07-14
 ### Added
 - Twinkling star sparkles inside the water (flash and fade).

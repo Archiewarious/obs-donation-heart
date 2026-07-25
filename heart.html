@@ -141,43 +141,8 @@ function alphaBounds(keyed){
   return {top,bot:bot||H};
 }
 
-let heart, darkHeart, mask, glow, gloss, vign, art, bounds, W=SIZE, H=SIZE;
+let heart, darkHeart, mask, glow, gloss, vign, bounds, W=SIZE, H=SIZE;
 const winks=[];                    // мерцающие блёстки в воде
-
-// Готовит ассеты из «полой» неоновой картинки (контур+эмблема на тёмном фоне):
-//  mask  — сплошной силуэт (заливка фона от углов);
-//  art   — яркие неон-элементы на прозрачном (накладка поверх воды);
-//  water — сам силуэт, залитый фиолетовым градиентом (тело «воды»);
-//  blank — пустой слой (заглушка для неиспользуемых).
-function buildHollow(img, R){
-  const rh=Math.round(R*img.height/img.width), N=R*rh, TB=0.42;
-  const src=document.createElement('canvas'); src.width=R; src.height=rh;
-  src.getContext('2d').drawImage(img,0,0,R,rh);
-  const p=src.getContext('2d').getImageData(0,0,R,rh).data;
-  const val=i=>Math.max(p[i*4],p[i*4+1],p[i*4+2])/255;
-  const ext=new Uint8Array(N), st=[];
-  for(const s of [0,R-1,(rh-1)*R,N-1]) if(val(s)<TB){ext[s]=1;st.push(s);}
-  while(st.length){ const i=st.pop(), x=i%R, y=(i/R)|0;
-    const nb=[x>0?i-1:-1,x<R-1?i+1:-1,y>0?i-R:-1,y<rh-1?i+R:-1];
-    for(const n of nb) if(n>=0&&!ext[n]&&val(n)<TB){ext[n]=1;st.push(n);} }
-  const mk=(fn)=>{ const c=document.createElement('canvas'); c.width=R; c.height=rh;
-    const d=c.getContext('2d').createImageData(R,rh); for(let i=0;i<N;i++) fn(d.data,i);
-    c.getContext('2d').putImageData(d,0,0); return c; };
-  const mask=mk((o,i)=>{ o[i*4]=o[i*4+1]=o[i*4+2]=255; o[i*4+3]=ext[i]?0:255; });
-  const artC=mk((o,i)=>{ const a=Math.min(1,Math.max(0,(val(i)-0.4)/0.22));
-    o[i*4]=p[i*4];o[i*4+1]=p[i*4+1];o[i*4+2]=p[i*4+2];o[i*4+3]=Math.round(a*255); });
-  const water=document.createElement('canvas'); water.width=R; water.height=rh;
-  const wx=water.getContext('2d'); const g=wx.createLinearGradient(0,0,0,rh);
-  g.addColorStop(0,'#c46bff'); g.addColorStop(0.5,'#9a34ff'); g.addColorStop(1,'#6412c0');
-  wx.fillStyle=g; wx.fillRect(0,0,R,rh);
-  wx.globalCompositeOperation='destination-in'; wx.drawImage(mask,0,0);
-  // сплошное сердце: оригинальная картинка × силуэт (тёмный «звёздный» фон внутри)
-  const solid=document.createElement('canvas'); solid.width=R; solid.height=rh;
-  const sox=solid.getContext('2d'); sox.drawImage(src,0,0);
-  sox.globalCompositeOperation='destination-in'; sox.drawImage(mask,0,0);
-  const blank=document.createElement('canvas'); blank.width=R; blank.height=rh;
-  return {mask, art:artC, water, solid, blank};
-}
 let target=0.35, level=0.0;
 const bubbles=[];
 const drops=[], sparks=[];        // капли всплеска и искорки над водой
@@ -247,9 +212,9 @@ function draw(){
     const st=t/1000;
     const cx=HW*(0.5+0.26*Math.sin(st/5)), cy=HH*(0.44+0.20*Math.cos(st/6.5));  // медленный дрейф
     const g=sx.createRadialGradient(cx,cy,0, cx,cy,HW*0.6);
-    g.addColorStop(0,'rgba(210,150,255,0.10)');
-    g.addColorStop(0.55,'rgba(160,80,255,0.035)');
-    g.addColorStop(1,'rgba(160,80,255,0)');
+    g.addColorStop(0,'rgba(255,190,220,0.10)');
+    g.addColorStop(0.55,'rgba(255,120,180,0.035)');
+    g.addColorStop(1,'rgba(255,120,180,0)');
     sx.fillStyle=g; sx.fillRect(0,0,HW,HH);
     sx.globalCompositeOperation='destination-in'; sx.drawImage(mask,0,0,HW,HH);   // клип по сердцу
     ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.drawImage(sh,0,0); ctx.restore();
@@ -265,12 +230,12 @@ function draw(){
     lx.beginPath(); lx.moveTo(0,HH); lx.lineTo(0,waveY2(0));
     for(let xx=0;xx<=HW;xx+=6) lx.lineTo(xx,waveY2(xx));
     lx.lineTo(HW,HH); lx.closePath();
-    lx.fillStyle='rgba(150,70,255,0.22)'; lx.fill();
+    lx.fillStyle='rgba(255,80,160,0.22)'; lx.fill();
     lx.beginPath();
     for(let xx=0;xx<=HW;xx+=5){ const y=waveY(xx); xx===0?lx.moveTo(xx,y):lx.lineTo(xx,y); }
-    lx.strokeStyle='rgba(195,130,255,.9)'; lx.lineWidth=4;
-    lx.shadowColor='rgba(150,60,255,1)'; lx.shadowBlur=14+18*kick; lx.stroke();
-    lx.shadowBlur=0; lx.strokeStyle='rgba(242,232,255,.98)'; lx.lineWidth=1.6; lx.stroke();
+    lx.strokeStyle='rgba(255,120,185,.9)'; lx.lineWidth=4;
+    lx.shadowColor='rgba(255,70,155,1)'; lx.shadowBlur=14+18*kick; lx.stroke();
+    lx.shadowBlur=0; lx.strokeStyle='rgba(255,235,245,.98)'; lx.lineWidth=1.6; lx.stroke();
 
     // капли: на сильном толчке отрываются от гребней и падают обратно
     if(kick>0.45 && Math.random()<0.35+0.5*burst){
@@ -280,8 +245,8 @@ function draw(){
     for(let i=drops.length-1;i>=0;i--){ const d=drops[i];
       d.x+=d.vx; d.y+=d.vy; d.vy+=0.16; d.a-=0.012;
       if(d.a<=0 || d.y>waveY(d.x)+8){ drops.splice(i,1); continue; }
-      lx.globalAlpha=d.a; lx.fillStyle='rgba(222,182,255,.95)';
-      lx.shadowColor='rgba(160,70,255,.9)'; lx.shadowBlur=7;
+      lx.globalAlpha=d.a; lx.fillStyle='rgba(255,190,225,.95)';
+      lx.shadowColor='rgba(255,80,165,.9)'; lx.shadowBlur=7;
       lx.beginPath(); lx.arc(d.x,d.y,d.r,0,6.29); lx.fill();
       lx.shadowBlur=0;
     }
@@ -323,16 +288,28 @@ function draw(){
     ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.drawImage(wk,0,0); ctx.restore();
   }
 
-  // 4) арт-накладка поверх воды: неоновый контур + лапка + искры (из картинки)
-  ctx.drawImage(art,0,0,HW,HH);
-  // вспышка неона на удар/донат
+  // 3.5) 3D-объём: затемнение к краям + стеклянный блик сверху (медленно «дышит»)
+  ctx.save(); ctx.globalCompositeOperation='multiply'; ctx.drawImage(vign,0,0,HW,HH); ctx.restore();
+  ctx.save(); ctx.globalCompositeOperation='lighter';
+  ctx.globalAlpha=0.85+0.15*Math.sin(t/1700);
+  ctx.drawImage(gloss,0,Math.sin(t/2300)*2,HW,HH);
+  ctx.restore();
+
+  // 4) постоянно светящийся неоновый контур + мягкое сияние
+  ctx.save();
+  ctx.globalCompositeOperation='lighter';
+  ctx.shadowColor='rgba(255,45,130,.95)'; ctx.shadowBlur=22; ctx.drawImage(glow,0,0,HW,HH); // ореол
+  ctx.shadowBlur=0; ctx.drawImage(glow,0,0,HW,HH);                                           // чёткий контур
+  ctx.restore();
+
+  // всплеск света на удар/донат — по контуру внутрь и наружу
   if(kick>0.02){
     ctx.save();
     ctx.globalCompositeOperation='lighter';
-    ctx.globalAlpha=0.5*kick;
-    ctx.shadowColor='rgba(185,95,255,'+(0.6+0.4*kick)+')';
-    ctx.shadowBlur=8+24*kick;
-    ctx.drawImage(art,0,0,HW,HH);
+    ctx.globalAlpha=0.35+0.55*kick;
+    ctx.shadowColor='rgba(255,90,170,'+(0.6+0.4*kick)+')';
+    ctx.shadowBlur=6+22*kick;
+    ctx.drawImage(glow,0,0,HW,HH);
     ctx.restore();
   }
 
@@ -345,10 +322,9 @@ function draw(){
     ctx.textAlign='center'; ctx.textBaseline='middle';
     try{ ctx.letterSpacing=Math.round(fs*0.02)+'px'; }catch(e){}
     // скромно, без акцента: лёгкая тень для читаемости, полупрозрачный белый
-    ctx.fillStyle='#fff';
-    ctx.shadowColor='rgba(20,0,40,0.95)'; ctx.shadowOffsetY=1; ctx.shadowBlur=fs*0.14;
-    ctx.fillText(txt,px,py); ctx.fillText(txt,px,py);   // двойной проход — глубже тень
-    ctx.shadowBlur=0; ctx.fillText(txt,px,py);
+    ctx.shadowColor='rgba(25,0,12,0.5)'; ctx.shadowOffsetY=1; ctx.shadowBlur=fs*0.07;
+    ctx.fillStyle='rgba(255,255,255,0.8)';
+    ctx.fillText(txt,px,py);
     ctx.restore();
   }
 
@@ -358,12 +334,11 @@ function draw(){
 
 async function main(){
   try{ if(document.fonts&&document.fonts.load) await document.fonts.load("200 40px Montserrat"); }catch(e){}
-  const img = await loadImg(window.HEART_IMG || 'pawheart-src.png');
-  const R=560, rh=Math.round(R*img.height/img.width);
-  const a=buildHollow(img,R);
-  heart=a.water; mask=a.mask; art=a.art;
-  darkHeart=a.solid; glow=a.blank; gloss=a.blank; vign=a.blank;   // solid = тёмный фон картинки внутри
-  bounds=alphaBounds(mask);
+  const img = await loadImg(window.HEART_IMG || '2.png');
+  const R=700, rh=Math.round(R*img.height/img.width);
+  heart=keyOut(img,R,rh); darkHeart=makeDark(heart); mask=heart; glow=makeRim(heart);
+  gloss=makeGloss(heart); vign=makeVignette(heart);
+  bounds=alphaBounds(heart);
   W=SIZE; H=Math.round(SIZE*rh/R);
   const dpr=Math.min(2,window.devicePixelRatio||1);
   cv.width=W*dpr; cv.height=H*dpr; cv.style.width=W+'px'; cv.style.height=H+'px'; ctx.scale(dpr,dpr);

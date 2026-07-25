@@ -4,7 +4,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const IMG = process.argv[2] || 'pawheart-src.png';   // какую картинку вшить
+const IMG = process.argv[2] || '2.png';          // какую картинку вшить
 const dir = __dirname;
 const html = fs.readFileSync(path.join(dir, 'heart.html'), 'utf8');
 const b64  = fs.readFileSync(path.join(dir, IMG)).toString('base64');

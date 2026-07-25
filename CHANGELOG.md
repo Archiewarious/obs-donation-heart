@@ -4,6 +4,11 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 project follows [Semantic Versioning](https://semver.org/).
 
+## [1.5.2] — 2026-07-25
+### Changed
+- Reverted the design back to the pink water heart. The paw-heart stays in git history
+  (v1.5.0/1.5.1) and `pawheart-src.png` if it's ever needed again.
+
 ## [1.5.1] — 2026-07-25
 ### Fixed
 - Heart interior is opaque again — keeps the image's original dark background inside

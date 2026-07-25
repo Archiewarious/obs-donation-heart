@@ -171,8 +171,12 @@ function buildHollow(img, R){
   g.addColorStop(0,'#c46bff'); g.addColorStop(0.5,'#9a34ff'); g.addColorStop(1,'#6412c0');
   wx.fillStyle=g; wx.fillRect(0,0,R,rh);
   wx.globalCompositeOperation='destination-in'; wx.drawImage(mask,0,0);
+  // сплошное сердце: оригинальная картинка × силуэт (тёмный «звёздный» фон внутри)
+  const solid=document.createElement('canvas'); solid.width=R; solid.height=rh;
+  const sox=solid.getContext('2d'); sox.drawImage(src,0,0);
+  sox.globalCompositeOperation='destination-in'; sox.drawImage(mask,0,0);
   const blank=document.createElement('canvas'); blank.width=R; blank.height=rh;
-  return {mask, art:artC, water, blank};
+  return {mask, art:artC, water, solid, blank};
 }
 let target=0.35, level=0.0;
 const bubbles=[];
@@ -358,7 +362,7 @@ async function main(){
   const R=560, rh=Math.round(R*img.height/img.width);
   const a=buildHollow(img,R);
   heart=a.water; mask=a.mask; art=a.art;
-  darkHeart=a.blank; glow=a.blank; gloss=a.blank; vign=a.blank;   // не используются в этом стиле
+  darkHeart=a.solid; glow=a.blank; gloss=a.blank; vign=a.blank;   // solid = тёмный фон картинки внутри
   bounds=alphaBounds(mask);
   W=SIZE; H=Math.round(SIZE*rh/R);
   const dpr=Math.min(2,window.devicePixelRatio||1);

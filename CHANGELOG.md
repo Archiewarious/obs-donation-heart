@@ -4,6 +4,11 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 project follows [Semantic Versioning](https://semver.org/).
 
+## [1.5.1] — 2026-07-25
+### Fixed
+- Heart interior is opaque again — keeps the image's original dark background inside
+  instead of showing the scene/gameplay through the transparent interior.
+
 ## [1.5.0] — 2026-07-25
 ### Added
 - New design — purple neon paw-heart. The engine now auto-adapts "hollow" neon images

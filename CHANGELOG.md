@@ -4,6 +4,15 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 project follows [Semantic Versioning](https://semver.org/).
 
+## [1.5.0] — 2026-07-25
+### Added
+- New design — purple neon paw-heart. The engine now auto-adapts "hollow" neon images
+  (glowing outline + emblem on a dark background): builds the solid silhouette via a
+  background flood-fill, lifts the neon art as an overlay, and fills the shape with
+  procedural purple water. Adding a design is basically dropping in a PNG.
+### Changed
+- Percentage restyled for readability over the darker art (full white + deep shadow).
+
 ## [1.4.1] — 2026-07-14
 ### Changed
 - Sparkles now float across the whole heart (dark part too), gently drifting upward,

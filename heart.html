@@ -56,22 +56,25 @@
 
 <script>
 const P = new URLSearchParams(location.search);
+// настройки: сначала из ссылки (?param=), иначе из settings.txt, иначе по умолчанию
+const S = window.SETTINGS || {};
+const opt = (k,d)=>{ const v = P.get(k) ?? S[k]; return (v===undefined||v===null||v==='') ? d : v; };
 const OBS = P.has('obs');
-const SIZE = +(P.get('size') || 440);
-const showPct = P.get('percent')!=='0';         // процент внутри сердца (спрятать — ?percent=0)
-const pctSize = +(P.get('pctsize')||0)/100;     // размер процента: доля ширины сердца (по умолч. 9.5)
+const SIZE = +opt('size',440);
+const showPct = String(opt('percent','1'))!=='0';   // процент внутри сердца
+const pctSize = +opt('pctsize',0)/100;              // размер процента: доля ширины сердца
 if (P.has('debug')) document.body.classList.add('debug');
-if (P.get('pulse')==='0') document.body.classList.add('nopulse');   // ?pulse=0 — выключить биение
+if (String(opt('pulse','1'))==='0') document.body.classList.add('nopulse');   // выключить биение
 if (OBS) document.getElementById('panel').classList.add('hidden');
 
 const cv = document.getElementById('c');
 const ctx = cv.getContext('2d');
 const amountEl = document.getElementById('amount');
 const titleEl = document.getElementById('title');
-const titleOn = P.get('title') !== '0';         // надпись показываем по умолчанию; спрятать — ?title=0
-// размеры текста в пикселях: ?titlesize= (надпись), ?sumsize= (сумма)
-if(P.get('titlesize')) titleEl.style.fontSize = (+P.get('titlesize'))+'px';
-if(P.get('sumsize'))   amountEl.style.fontSize = (+P.get('sumsize'))+'px';
+const titleOn = String(opt('title','1')) !== '0';   // надпись сбора
+// размеры текста в пикселях
+if(opt('titlesize',0)) titleEl.style.fontSize = (+opt('titlesize',0))+'px';
+if(opt('sumsize',0))   amountEl.style.fontSize = (+opt('sumsize',0))+'px';
 
 function loadImg(src){ return new Promise((ok,err)=>{ const i=new Image(); i.crossOrigin='anonymous';
   i.onload=()=>ok(i); i.onerror=err; i.src=src; }); }

@@ -29,8 +29,10 @@
 ### Установка и настройка (один раз)
 1. Скачай/клонируй проект в любую папку.
 2. Установи **Node.js** (LTS) с https://nodejs.org.
-3. Создай файл со ссылкой сбора: скопируй `link.example.txt` → переименуй в **`link.txt`** и вставь туда ссылку своего виджета-цели DonationAlerts
+3. Создай файл настроек: скопируй `settings.example.txt` → переименуй в **`settings.txt`**
+   и впиши ссылку своего виджета-цели DonationAlerts в строку `link = ...`
    (вида `https://www.donationalerts.com/widget/goal/ЧИСЛО?token=...`).
+   Там же — размеры и что показывать.
 4. В OBS: **Инструменты → Скрипты → «+»** → выбери `heart-helper.lua`.
 5. В OBS добавь **Браузер-источник**:
    - URL: `http://localhost:8123/heart-obs.html?obs=1`
@@ -38,7 +40,9 @@
 6. Всё. Дальше просто открывай OBS как обычно — помощник поднимается сам.
 
 ### Сменить сбор
-Открой `link.txt`, вставь новую ссылку, сохрани. Обновится за ~12 сек. Название и сумма подтянутся сами.
+Открой `settings.txt`, замени ссылку в строке `link = ...`, сохрани. Обновится за ~12 сек.
+Название и сумма подтянутся сами. Там же меняются размеры (`size`, `titlesize`, `sumsize`,
+`pctsize`) и что показывать (`title`, `percent`, `pulse`) — после правки обнови кэш источника в OBS.
 
 ### Параметры ссылки (в URL источника)
 | Параметр | Что делает |
@@ -86,8 +90,10 @@ An OBS widget: your heart image fills with water from the bottom up, proportiona
 ### Install & setup (once)
 1. Download/clone the project into any folder.
 2. Install **Node.js** (LTS) from https://nodejs.org.
-3. Create the goal-link file: copy `link.example.txt` → rename it to **`link.txt`** and paste the link to your DonationAlerts goal widget
+3. Create the settings file: copy `settings.example.txt` → rename it to **`settings.txt`**
+   and put the link to your DonationAlerts goal widget into the `link = ...` line
    (like `https://www.donationalerts.com/widget/goal/NUMBER?token=...`).
+   Sizes and toggles live in the same file.
 4. In OBS: **Tools → Scripts → “+”** → pick `heart-helper.lua`.
 5. In OBS add a **Browser source**:
    - URL: `http://localhost:8123/heart-obs.html?obs=1`
@@ -95,7 +101,9 @@ An OBS widget: your heart image fills with water from the bottom up, proportiona
 6. Done. Just open OBS normally — the helper starts on its own.
 
 ### Change the collection
-Open `link.txt`, paste a new link, save. Updates within ~12 s. Title and amount follow automatically.
+Open `settings.txt`, replace the link in the `link = ...` line, save. Updates within ~12 s.
+Sizes (`size`, `titlesize`, `sumsize`, `pctsize`) and toggles (`title`, `percent`, `pulse`)
+live in the same file — refresh the source cache in OBS after editing.
 
 ### URL options (on the source URL)
 | Option | Effect |

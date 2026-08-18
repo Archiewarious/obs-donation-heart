@@ -45,17 +45,34 @@ const MIME = { '.html':'text/html; charset=utf-8', '.js':'text/javascript', '.cs
 
 const DA = 'https://www.donationalerts.com';
 const bearers = {};                 // кэш bearer-токенов по widget-токену
-const LINK_FILE = 'link.txt';
-
-// Берём token и номер цели прямо из ссылки в файле "link.txt".
-// Чтобы сменить сбор — просто вставь туда новую ссылку и сохрани. Перезапуск не нужен.
+// Все настройки — в "settings.txt" (ключ = значение). Старый "link.txt" тоже
+// поддерживается: если settings.txt нет, ссылку возьмём оттуда.
+function readSettings(){
+  const out = {};
+  for(const f of ['settings.txt','link.txt']){
+    let txt; try{ txt = fs.readFileSync(path.join(ROOT, f), 'utf8'); }catch{ continue; }
+    for(const line of txt.split(/\r?\n/)){
+      const s = line.trim();
+      if(!s || s.startsWith('#')) continue;
+      if(/^https?:\/\//i.test(s)){                // голая ссылка (старый link.txt)
+        if(!out.link) out.link = s;
+        continue;
+      }
+      const i = s.indexOf('=');
+      if(i > 0){                                  // ключ = значение
+        const k = s.slice(0,i).trim();
+        const v = s.slice(i+1).trim().replace(/^["']|["']$/g,'');
+        if(k && !/\s|\/|:/.test(k) && !(k in out)) out[k] = v;
+      }
+    }
+  }
+  return out;
+}
+// token и номер цели вытаскиваем из ссылки
 function readConfig(){
-  try{
-    const txt = fs.readFileSync(path.join(ROOT, LINK_FILE), 'utf8');
-    const g = txt.match(/goal\/(\d+)/);
-    const t = txt.match(/token=([A-Za-z0-9_\-]+)/);
-    return { token: t && t[1], goal: g && g[1] };
-  }catch{ return {}; }
+  const link = readSettings().link || '';
+  const g = link.match(/goal\/(\d+)/), t = link.match(/token=([A-Za-z0-9_\-]+)/);
+  return { token: t && t[1], goal: g && g[1] };
 }
 
 async function exchangeToken(widgetToken){
@@ -98,8 +115,17 @@ http.createServer(async (req, res) => {
   if (!file.startsWith(ROOT)) { res.writeHead(403); return res.end('forbidden'); }
   fs.readFile(file, (err, data) => {
     if (err) { res.writeHead(404); return res.end('not found'); }
+    // в HTML-виджет подставляем настройки из settings.txt (кроме ссылки — она секрет)
+    if (file.toLowerCase().endsWith('.html')) {
+      // отдаём виджету только безопасные настройки (ссылка/токен наружу не уходят)
+      const all = readSettings(), s = {};
+      for(const k of ['size','titlesize','sumsize','pctsize','title','percent','pulse'])
+        if(all[k] !== undefined) s[k] = all[k];
+      data = Buffer.from(data.toString('utf8').replace('<body>',
+        '<body>\n<script>window.SETTINGS=' + JSON.stringify(s) + ';</script>'), 'utf8');
+    }
     res.writeHead(200, { 'Content-Type': MIME[path.extname(file).toLowerCase()] || 'application/octet-stream',
-      'Access-Control-Allow-Origin':'*' });
+      'Access-Control-Allow-Origin':'*', 'Cache-Control':'no-store' });
     res.end(data);
   });
 }).on('error', () => process.exit(0))   // порт занят (помощник уже работает) — тихо выйти, дублей не плодить

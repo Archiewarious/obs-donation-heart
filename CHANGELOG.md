@@ -4,6 +4,14 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 project follows [Semantic Versioning](https://semver.org/).
 
+## [1.7.0] — 2026-08-19
+### Added
+- Single settings file `settings.txt` (`key = value`): goal link, heart size, text sizes,
+  and toggles for the title / percentage / heartbeat. URL params still override it.
+### Security
+- The goal link and token are never injected into the widget HTML — only whitelisted
+  display settings are passed through.
+
 ## [1.6.0] — 2026-07-25
 ### Added
 - Configurable text sizes via URL: `titlesize` (goal title, px), `sumsize` (amount, px),

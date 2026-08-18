@@ -47,6 +47,9 @@
 | `&title=0` | спрятать надпись (по умолчанию показана) |
 | `&pulse=0` | выключить биение и свечение |
 | `&level=50` | тест-уровень 50% (без живых данных, просто посмотреть) |
+| `&titlesize=26` | размер надписи (название сбора), px |
+| `&sumsize=34` | размер суммы, px |
+| `&pctsize=12` | размер процента внутри сердца (% от ширины сердца) |
 
 ### Как это работает
 Браузер (и OBS) из-за защиты (CORS) не может сам читать API DonationAlerts. Поэтому маленький помощник `server.js` ходит за данными на сервере и отдаёт их виджету на `localhost:8123`. Скрипт `heart-helper.lua` запускает помощника вместе с OBS; сам помощник закрывается через ~15 сек после закрытия OBS.
@@ -101,6 +104,9 @@ Open `link.txt`, paste a new link, save. Updates within ~12 s. Title and amount 
 | `&title=0` | hide the caption (shown by default) |
 | `&pulse=0` | disable heartbeat and glow |
 | `&level=50` | test level 50% (no live data, just a preview) |
+| `&titlesize=26` | goal title size, px |
+| `&sumsize=34` | amount size, px |
+| `&pctsize=12` | percentage size inside the heart (% of heart width) |
 
 ### How it works
 Browsers (and OBS) cannot read the DonationAlerts API directly due to CORS. So a tiny helper (`server.js`) fetches the data server-side and serves it to the widget on `localhost:8123`. The `heart-helper.lua` script launches the helper together with OBS; the helper exits ~15 s after OBS is closed.

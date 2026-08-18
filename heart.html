@@ -59,6 +59,7 @@ const P = new URLSearchParams(location.search);
 const OBS = P.has('obs');
 const SIZE = +(P.get('size') || 440);
 const showPct = P.get('percent')!=='0';         // процент внутри сердца (спрятать — ?percent=0)
+const pctSize = +(P.get('pctsize')||0)/100;     // размер процента: доля ширины сердца (по умолч. 9.5)
 if (P.has('debug')) document.body.classList.add('debug');
 if (P.get('pulse')==='0') document.body.classList.add('nopulse');   // ?pulse=0 — выключить биение
 if (OBS) document.getElementById('panel').classList.add('hidden');
@@ -68,6 +69,9 @@ const ctx = cv.getContext('2d');
 const amountEl = document.getElementById('amount');
 const titleEl = document.getElementById('title');
 const titleOn = P.get('title') !== '0';         // надпись показываем по умолчанию; спрятать — ?title=0
+// размеры текста в пикселях: ?titlesize= (надпись), ?sumsize= (сумма)
+if(P.get('titlesize')) titleEl.style.fontSize = (+P.get('titlesize'))+'px';
+if(P.get('sumsize'))   amountEl.style.fontSize = (+P.get('sumsize'))+'px';
 
 function loadImg(src){ return new Promise((ok,err)=>{ const i=new Image(); i.crossOrigin='anonymous';
   i.onload=()=>ok(i); i.onerror=err; i.src=src; }); }
@@ -315,7 +319,7 @@ function draw(){
 
   // 5) процент собранного — внутри сердца, тонким чистым шрифтом
   if(showPct){
-    const fs=Math.round(HW*0.095), txt=Math.round(level*100)+'%';
+    const fs=Math.round(HW*(pctSize>0?pctSize:0.095)), txt=Math.round(level*100)+'%';
     const px=HW/2, py=(bt+bb)/2;        // ровно по центру силуэта сердца
     ctx.save();
     ctx.font="200 "+fs+"px Montserrat, Arial, sans-serif";

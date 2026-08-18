@@ -4,6 +4,11 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 project follows [Semantic Versioning](https://semver.org/).
 
+## [1.6.0] — 2026-07-25
+### Added
+- Configurable text sizes via URL: `titlesize` (goal title, px), `sumsize` (amount, px),
+  `pctsize` (percentage inside the heart, % of heart width).
+
 ## [1.5.2] — 2026-07-25
 ### Changed
 - Reverted the design back to the pink water heart. The paw-heart stays in git history

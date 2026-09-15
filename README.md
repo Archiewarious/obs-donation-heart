@@ -29,10 +29,13 @@
 ### Установка и настройка (один раз)
 1. Скачай/клонируй проект в любую папку.
 2. Установи **Node.js** (LTS) с https://nodejs.org.
-3. Создай файл настроек: скопируй `settings.example.txt` → переименуй в **`settings.txt`**
-   и впиши ссылку своего виджета-цели DonationAlerts в строку `link = ...`
-   (вида `https://www.donationalerts.com/widget/goal/ЧИСЛО?token=...`).
-   Там же — размеры и что показывать.
+3. Создай в папке проекта файл **`settings.txt`** и впиши в него ссылку своего виджета-цели DonationAlerts:
+   ```
+   link = https://www.donationalerts.com/widget/goal/ЧИСЛО?token=...
+   ```
+   По желанию туда же, каждую с новой строки: `size = 440`, `titlesize = 22`, `sumsize = 30`,
+   `pctsize = 9.5`, `title = 1`, `percent = 1`, `pulse = 1` (`1` — показать, `0` — скрыть).
+   Строки с `#` — комментарии.
 4. В OBS: **Инструменты → Скрипты → «+»** → выбери `heart-helper.lua`.
 5. В OBS добавь **Браузер-источник**:
    - URL: `http://localhost:8123/heart-obs.html?obs=1`
@@ -90,10 +93,13 @@ An OBS widget: your heart image fills with water from the bottom up, proportiona
 ### Install & setup (once)
 1. Download/clone the project into any folder.
 2. Install **Node.js** (LTS) from https://nodejs.org.
-3. Create the settings file: copy `settings.example.txt` → rename it to **`settings.txt`**
-   and put the link to your DonationAlerts goal widget into the `link = ...` line
-   (like `https://www.donationalerts.com/widget/goal/NUMBER?token=...`).
-   Sizes and toggles live in the same file.
+3. Create a **`settings.txt`** file in the project folder with the link to your DonationAlerts goal widget:
+   ```
+   link = https://www.donationalerts.com/widget/goal/NUMBER?token=...
+   ```
+   Optionally add, one per line: `size = 440`, `titlesize = 22`, `sumsize = 30`,
+   `pctsize = 9.5`, `title = 1`, `percent = 1`, `pulse = 1` (`1` — show, `0` — hide).
+   Lines starting with `#` are comments.
 4. In OBS: **Tools → Scripts → “+”** → pick `heart-helper.lua`.
 5. In OBS add a **Browser source**:
    - URL: `http://localhost:8123/heart-obs.html?obs=1`

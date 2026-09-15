@@ -4,6 +4,10 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 project follows [Semantic Versioning](https://semver.org/).
 
+## [1.7.2] — 2026-09-15
+### Removed
+- `settings.example.txt` template. The README now shows what to put into `settings.txt`.
+
 ## [1.7.1] — 2026-09-15
 ### Removed
 - Legacy `link.txt` fallback. The goal link is read only from `settings.txt`, so a broken

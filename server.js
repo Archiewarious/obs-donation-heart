@@ -45,25 +45,18 @@ const MIME = { '.html':'text/html; charset=utf-8', '.js':'text/javascript', '.cs
 
 const DA = 'https://www.donationalerts.com';
 const bearers = {};                 // кэш bearer-токенов по widget-токену
-// Все настройки — в "settings.txt" (ключ = значение). Старый "link.txt" тоже
-// поддерживается: если settings.txt нет, ссылку возьмём оттуда.
+// Все настройки — только в "settings.txt" (ключ = значение).
 function readSettings(){
   const out = {};
-  for(const f of ['settings.txt','link.txt']){
-    let txt; try{ txt = fs.readFileSync(path.join(ROOT, f), 'utf8'); }catch{ continue; }
-    for(const line of txt.split(/\r?\n/)){
-      const s = line.trim();
-      if(!s || s.startsWith('#')) continue;
-      if(/^https?:\/\//i.test(s)){                // голая ссылка (старый link.txt)
-        if(!out.link) out.link = s;
-        continue;
-      }
-      const i = s.indexOf('=');
-      if(i > 0){                                  // ключ = значение
-        const k = s.slice(0,i).trim();
-        const v = s.slice(i+1).trim().replace(/^["']|["']$/g,'');
-        if(k && !/\s|\/|:/.test(k) && !(k in out)) out[k] = v;
-      }
+  let txt; try{ txt = fs.readFileSync(path.join(ROOT, 'settings.txt'), 'utf8'); }catch{ return out; }
+  for(const line of txt.split(/\r?\n/)){
+    const s = line.trim();
+    if(!s || s.startsWith('#')) continue;
+    const i = s.indexOf('=');
+    if(i > 0){                                  // ключ = значение
+      const k = s.slice(0,i).trim();
+      const v = s.slice(i+1).trim().replace(/^["']|["']$/g,'');
+      if(k && !/\s|\/|:/.test(k) && !(k in out)) out[k] = v;
     }
   }
   return out;

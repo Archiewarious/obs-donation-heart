@@ -4,6 +4,11 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 project follows [Semantic Versioning](https://semver.org/).
 
+## [1.7.1] — 2026-09-15
+### Removed
+- Legacy `link.txt` fallback. The goal link is read only from `settings.txt`, so a broken
+  `link` line can no longer silently switch the widget to an old goal.
+
 ## [1.7.0] — 2026-08-19
 ### Added
 - Single settings file `settings.txt` (`key = value`): goal link, heart size, text sizes,
